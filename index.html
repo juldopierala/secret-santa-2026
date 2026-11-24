@@ -652,7 +652,7 @@ Pozostało: 10s
         // 1. PARTICIPANTS, ROOM & CLOUD URL CONFIG
         // ==========================================
         const PARTICIPANTS = ["Marta", "Diego", "Julia", "Maciek", "Marek", "Marysia", "Asia", "Anita"];
-        const FLIGHT_DURATION_MS = 15000;
+        const FLIGHT_DURATION_MS = 10000;
 
         function parseHashState() {
             const rawHash = window.location.hash ? window.location.hash.replace(/^#/, "").trim() : "";
@@ -740,12 +740,12 @@ Pozostało: 10s
                 treeAriaLabel: "Kliknij w choinkę, aby rozpocząć losowanie",
                 backToLogin: "Wróć do ekranu logowania",
                 flyingBadge: "✨ Magia Świąt w toku ✨",
-flyingMessages: {
-    15: "🎅 Mikołaj rusza w magiczną podróż!",
-    12: "🦌 Renifery pędzą przez rozgwieżdżone niebo...",
-    9: "✨ Złote iskierki wskazują drogę!",
-    6: "🎁 Elfy przygotowują Twój prezent...",
-    3: "🎄 Mikołaj już ląduje pod choinką!"
+   flyingMessages: {
+    10: "🎅 Mikołaj rusza w magiczną podróż!",
+    8: "🦌 Renifery pędzą przez rozgwieżdżone niebo...",
+    6: "✨ Złote iskierki wskazują drogę!",
+    4: "🎁 Elfy przygotowują Twój prezent...",
+    2: "🎄 Mikołaj już ląduje pod choinką!"
 },
                 countdownText: (sec) => `Pozostało: ${sec}s`,
                 resultBadge: '<span>🎁</span> Tajna Misja Świąteczna <span>🎁</span>',
@@ -840,7 +840,7 @@ flyingMessages: {
         };
 
         let currentLang = "pl";
-        let currentFlyingSecond = 15;
+        let currentFlyingSecond = 10;
         let isReturningUserTree = false;
         let lastLoginErrorFn = null;
         let selectedPerson = null;
@@ -1422,7 +1422,7 @@ flyingMessages: {
 
             document.getElementById("flying-badge").textContent = t.flyingBadge;
             document.getElementById("flying-countdown").textContent = t.countdownText(currentFlyingSecond);
-            let activeMsg = t.flyingMessages[15];
+            let activeMsg = t.flyingMessages[10];
             if (currentFlyingSecond <= 2) activeMsg = t.flyingMessages[2];
             else if (currentFlyingSecond <= 4) activeMsg = t.flyingMessages[4];
             else if (currentFlyingSecond <= 7) activeMsg = t.flyingMessages[7];
@@ -1644,14 +1644,14 @@ flyingMessages: {
             progressBar.classList.add("progress-10s");
 
             showScreen("flying");
-            playJingleBells(15);
+            playJingleBells(10);
 
             const statusText = document.getElementById("flying-status-text");
             const countdownEl = document.getElementById("flying-countdown");
 
-            currentFlyingSecond = 15;
+            currentFlyingSecond = 10;
             countdownEl.textContent = I18N[currentLang].countdownText(currentFlyingSecond);
-            statusText.textContent = I18N[currentLang].flyingMessages[15];
+            statusText.textContent = I18N[currentLang].flyingMessages[10];
 
             const timerInterval = setInterval(() => {
                 currentFlyingSecond--;
