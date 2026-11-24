@@ -1405,7 +1405,7 @@ flyingMessages: {
 
             document.getElementById("flying-badge").textContent = t.flyingBadge;
             document.getElementById("flying-countdown").textContent = t.countdownText(currentFlyingSecond);
-            let activeMsg = t.flyingMessages[10];
+            let activeMsg = t.flyingMessages[15];
             if (currentFlyingSecond <= 2) activeMsg = t.flyingMessages[2];
             else if (currentFlyingSecond <= 4) activeMsg = t.flyingMessages[4];
             else if (currentFlyingSecond <= 7) activeMsg = t.flyingMessages[7];
@@ -1634,7 +1634,7 @@ flyingMessages: {
 
             currentFlyingSecond = 15;
             countdownEl.textContent = I18N[currentLang].countdownText(currentFlyingSecond);
-            statusText.textContent = I18N[currentLang].flyingMessages[10];
+            statusText.textContent = I18N[currentLang].flyingMessages[15];
 
             const timerInterval = setInterval(() => {
                 currentFlyingSecond--;
