@@ -88,7 +88,7 @@
         .tree-star { transform-box: fill-box; transform-origin: center; animation: starPulse 2.4s infinite ease-in-out; }
 
         /* Strictly 10-second Santa flight across the screen */
-      @keyframes santaFlight15s {
+      @keyframes santaFlight10s {
     0% {
         transform: translate3d(-460px, 65px, 0) rotate(-5deg) scale(0.84);
     }
@@ -126,7 +126,7 @@
             50% { opacity: 0.25; transform: scale(0.7); }
         }
 
-        @keyframes progressFill15s {
+        @keyframes progressFill10s {
             0% { width: 0%; }
             100% { width: 100%; }
         }
@@ -136,7 +136,7 @@
             top: 28%;
             left: 0;
             will-change: transform;
-            animation: santaFlight15s 15s linear forwards;
+            animation: santaFlight10s 10s linear forwards;
             z-index: 30;
         }
 
@@ -153,7 +153,7 @@
 .reindeer-2 {
     transform-box: fill-box;
     transform-origin: center;
-    animation: reindeerGallop 0.45s ease-in-out infinite 0.15s;
+    animation: reindeerGallop 0.45s ease-in-out infinite 0.10s;
 }
 
 .sky-star { animation: starTwinkleSky 2.2s ease-in-out infinite; }
@@ -184,11 +184,11 @@
     }
 }
         
-       .progress-15s {
-    animation: progressFill15s 15s linear forwards;
+       .progress-10s {
+    animation: progressFill10s 10s linear forwards;
 }
 
-@keyframes progressFill15s {
+@keyframes progressFill10s {
     from { width: 0%; }
     to { width: 100%; }
 }
@@ -576,7 +576,7 @@
                 <div id="flying-progress-bar" class="h-full bg-gradient-to-r from-red-500 via-amber-400 to-emerald-400 rounded-full"></div>
             </div>
             <p id="flying-countdown" class="text-amber-200 text-sm font-semibold mt-2.5 tracking-wide">
-Pozostało: 15s
+Pozostało: 10s
             </p>
         </div>
     </div>
@@ -1623,7 +1623,7 @@ flyingMessages: {
         });
 
         // ==========================================
-        // 9. STEP 2 & 3: TREE CLICK -> 15s SANTA FLIGHT
+        // 9. STEP 2 & 3: TREE CLICK -> 10s SANTA FLIGHT
         // ==========================================
         async function startSantaDraw() {
             if (!selectedPerson || isDrawingInProgress || !roomData) return;
@@ -1638,10 +1638,10 @@ flyingMessages: {
             const progressBar = document.getElementById("flying-progress-bar");
 
             santaContainer.classList.remove("santa-fly-wrapper");
-            progressBar.classList.remove("progress-15s");
+            progressBar.classList.remove("progress-10s");
             void santaContainer.offsetWidth;
             santaContainer.classList.add("santa-fly-wrapper");
-            progressBar.classList.add("progress-15s");
+            progressBar.classList.add("progress-10s");
 
             showScreen("flying");
             playJingleBells(15);
