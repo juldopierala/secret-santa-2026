@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Świąteczne Losowanie Prezentów 🎄</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+        :root {
+            --gold: #f59e0b;
+            --gold-light: #fde68a;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(ellipse at top, #183254 0%, #0b1626 55%, #050911 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        .font-christmas {
+            font-family: 'Mountains of Christmas', cursive, serif;
+        }
+
+        #snow-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.78);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(251, 191, 36, 0.32);
+            box-shadow: 0 25px 55px -12px rgba(0, 0, 0, 0.75), 0 0 35px rgba(245, 158, 11, 0.14);
+        }
+
+        .hidden-screen {
+            display: none !important;
+        }
+
+        /* Christmas tree animations */
+        @keyframes twinkle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.35; transform: scale(0.82); }
+        }
+
+        @keyframes starPulse {
+            0%, 100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 12px #fbbf24); }
+            50% { transform: scale(1.14) rotate(7deg); filter: drop-shadow(0 0 24px #fde047); }
+        }
+
+        @keyframes floatTree {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-7px); }
+        }
+
+        .tree-container {
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: floatTree 4s ease-in-out infinite;
+        }
+
+        .tree-container:hover {
+            transform: scale(1.05);
+        }
+
+        .tree-container:active {
+            transform: scale(0.96);
+        }
+
+        .ornament-1 { transform-box: fill-box; transform-origin: center; animation: twinkle 1.7s infinite ease-in-out; }
+        .ornament-2 { transform-box: fill-box; transform-origin: center; animation: twinkle 2.2s infinite ease-in-out 0.4s; }
+        .ornament-3 { transform-box: fill-box; transform-origin: center; animation: twinkle 1.5s infinite ease-in-out 0.9s; }
+        .ornament-4 { transform-box: fill-box; transform-origin: center; animation: twinkle 2.0s infinite ease-in-out 1.3s; }
+        .tree-star { transform-box: fill-box; transform-origin: center; animation: starPulse 2.4s infinite ease-in-out; }
+
+        /* Strictly 10-second Santa flight across the screen */
+        @keyframes santaFlight10s {
+            0% {
+                transform: translate3d(-460px, 65px, 0) rotate(-5deg) scale(0.84);
+            }
+            20% {
+                transform: translate3d(14vw, -22px, 0) rotate(3deg) scale(0.94);
+            }
+            40% {
+                transform: translate3d(36vw, 20px, 0) rotate(-3deg) scale(1.02);
+            }
+            60% {
+                transform: translate3d(58vw, -28px, 0) rotate(4deg) scale(1.05);
+            }
+            80% {
+                transform: translate3d(80vw, 14px, 0) rotate(-2deg) scale(0.96);
+            }
+            100% {
+                transform: translate3d(calc(100vw + 460px), -18px, 0) rotate(-5deg) scale(0.88);
+            }
+        }
+
+        @keyframes sleighBob {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes reindeerGallop {
+            0%, 100% { transform: rotate(-5deg) translateY(0px); }
+            50% { transform: rotate(7deg) translateY(-6px); }
+        }
+
+        @keyframes starTwinkleSky {
+            0%, 100% { opacity: 0.95; transform: scale(1); }
+            50% { opacity: 0.25; transform: scale(0.7); }
+        }
+
+        @keyframes progressFill10s {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        .santa-fly-wrapper {
+            position: absolute;
+            top: 28%;
+            left: 0;
+            will-change: transform;
+            animation: santaFlight10s 10s linear forwards;
+            z-index: 30;
+        }
+
+        .sleigh-bob {
+            animation: sleighBob 0.75s ease-in-out infinite;
+        }
+
+        .reindeer-1 { transform-box: fill-box; transform-origin: center; animation: reindeerGallop 0.45s ease-in-out infinite; }
+        .reindeer-2 { transform-box: fill-box; transform-origin: center; animation: reindeerGallop 0.45s ease-in-out infinite 0.15s; }
+        .sky-star { animation: starTwinkleSky 2.2s ease-in-out infinite; }
+
+        .progress-10s {
+            animation: progressFill10s 10s linear forwards;
+        }
+
+        @keyframes revealCard {
+            0% { opacity: 0; transform: scale(0.8) translateY(24px); }
+            70% { opacity: 1; transform: scale(1.03) translateY(-3px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .reveal-animation {
+            animation: revealCard 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .gold-shimmer {
+            background: linear-gradient(to right, #fde68a 20%, #f59e0b 40%, #fef3c7 60%, #d97706 80%);
+            background-size: 200% auto;
+            color: #fde68a;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3.5s linear infinite;
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+    </style>
+</head>
+<body class="relative flex flex-col justify-between min-h-screen">
+
+    <!-- Snow & Confetti Canvas -->
+    <canvas id="snow-canvas"></canvas>
+
+    <!-- Top Navigation Bar -->
+    <header class="fixed top-0 left-0 right-0 z-40 flex flex-wrap items-center justify-between gap-2 px-3 py-3 sm:px-6 pointer-events-none">
+        <div class="pointer-events-auto flex items-center gap-2 bg-slate-900/85 backdrop-blur-md border border-amber-500/35 rounded-full px-3.5 py-1.5 text-xs sm:text-sm text-amber-200 shadow-lg">
+            <span>🎄</span>
+            <span id="room-label" class="hidden sm:inline text-slate-300">Pokój:</span>
+            <strong id="room-badge" class="text-amber-400 tracking-wider">gwiazdka2026</strong>
+        </div>
+
+        <div class="pointer-events-auto flex items-center gap-2">
+            <!-- Language Switcher: PL / EN -->
+            <div class="flex items-center bg-slate-900/90 backdrop-blur-md border border-amber-500/40 rounded-full p-1 shadow-lg" role="group" aria-label="Language switcher">
+                <button id="lang-pl-btn" type="button" class="px-2.5 py-1 rounded-full text-xs font-semibold transition cursor-pointer bg-amber-500 text-slate-950 shadow">
+                    🇵🇱 Polski
+                </button>
+                <button id="lang-en-btn" type="button" class="px-2.5 py-1 rounded-full text-xs font-semibold transition cursor-pointer text-slate-300 hover:text-white">
+                    🇬🇧 English
+                </button>
+            </div>
+
+            <!-- Sound Toggle Button -->
+            <button id="sound-toggle-btn" type="button" title="Włącz/wyłącz dzwoneczki świąteczne" class="p-2.5 rounded-full bg-slate-900/85 backdrop-blur-md border border-amber-500/35 text-amber-300 hover:bg-amber-500/20 transition shadow-lg cursor-pointer">
+                <svg id="sound-on-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                </svg>
+                <svg id="sound-off-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                </svg>
+            </button>
+
+            <!-- Collapsible Status / Room Panel Button -->
+            <button id="status-open-btn" type="button" title="Status losowania i nowy pokój" class="p-2.5 rounded-full bg-slate-900/85 backdrop-blur-md border border-amber-500/35 text-slate-300 hover:text-amber-300 hover:bg-amber-500/20 transition shadow-lg cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Toast Notification -->
+    <div id="toast-box" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl bg-slate-900/95 border border-amber-400/60 text-amber-100 text-sm font-medium shadow-2xl transition-all duration-300 opacity-0 pointer-events-none translate-y-4 text-center max-w-xs sm:max-w-md">
+        Skopiowano link!
+    </div>
+
+    <!-- Main Content -->
+    <main class="relative z-10 w-full max-w-lg mx-auto px-4 my-24 sm:my-20">
+
+        <!-- STEP 1: Login & 4-digit PIN -->
+        <section id="screen-login" class="glass-panel rounded-3xl p-6 sm:p-10 text-center transition-all duration-300">
+            <div class="mb-3 inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-red-600 to-red-800 border-2 border-amber-400 shadow-lg text-3xl">
+                🎅
+            </div>
+            <h1 id="login-title" class="font-christmas text-4xl sm:text-5xl font-bold gold-shimmer mb-2 tracking-wide">
+                Świąteczne Losowanie
+            </h1>
+            <p id="login-subtitle" class="text-slate-300 text-xs sm:text-sm mb-6 leading-relaxed">
+                Wpisz swoje imię oraz wymyśl swój <strong class="text-amber-300">4-cyfrowy PIN</strong>. PIN chroni Twój wynik, aby nikt inny na innym telefonie go nie podejrzał!
+            </p>
+
+            <form id="login-form" class="space-y-4" novalidate>
+                <div>
+                    <label id="name-label" for="name-input" class="block text-left text-xs font-medium text-amber-200/85 mb-1.5 ml-1">
+                        Twoje imię:
+                    </label>
+                    <input
+                        type="text"
+                        id="name-input"
+                        list="participants-datalist"
+                        autocomplete="off"
+                        placeholder="np. Marta, Diego, Julia..."
+                        class="w-full px-5 py-3.5 rounded-2xl bg-slate-950/85 border-2 border-amber-500/35 focus:border-amber-400 focus:outline-none text-white placeholder-slate-500 text-base sm:text-lg text-center font-medium transition shadow-inner select-text"
+                    />
+                    <datalist id="participants-datalist">
+                        <option value="Marta"></option>
+                        <option value="Diego"></option>
+                        <option value="Julia"></option>
+                        <option value="Maciek"></option>
+                        <option value="Marek"></option>
+                        <option value="Marysia"></option>
+                        <option value="Asia"></option>
+                        <option value="Anita"></option>
+                    </datalist>
+                </div>
+
+                <div>
+                    <label id="pin-label" for="pin-input" class="block text-left text-xs font-medium text-amber-200/85 mb-1.5 ml-1">
+                        Twój tajny 4-cyfrowy kod PIN:
+                    </label>
+                    <input
+                        type="password"
+                        id="pin-input"
+                        maxlength="4"
+                        inputmode="numeric"
+                        pattern="[0-9]{4}"
+                        autocomplete="off"
+                        placeholder="••••"
+                        class="w-full px-5 py-3.5 rounded-2xl bg-slate-950/85 border-2 border-amber-500/35 focus:border-amber-400 focus:outline-none text-amber-300 placeholder-slate-500 text-xl text-center font-bold tracking-[0.5em] transition shadow-inner select-text"
+                    />
+                    <p id="pin-hint" class="text-[11px] text-slate-400 mt-1.5">
+                        🔒 Przy pierwszym wejściu ten PIN zapisze się dla Twojego imienia. Zapamiętaj go!
+                    </p>
+                </div>
+
+                <div id="login-error" class="hidden rounded-2xl bg-red-950/90 border border-red-500/60 p-3.5 text-red-200 text-xs sm:text-sm font-medium leading-snug"></div>
+
+                <button
+                    type="submit"
+                    id="login-submit-btn"
+                    class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-red-600 via-red-700 to-red-600 hover:from-red-500 hover:to-red-600 text-white font-semibold text-lg shadow-lg shadow-red-900/50 border border-amber-400/40 transition transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+                >
+                    Przejdź do choinki ✨
+                </button>
+            </form>
+
+            <!-- Participants Quick Chips -->
+            <div class="mt-7 pt-5 border-t border-slate-700/60">
+                <p id="participants-heading" class="text-[11px] uppercase tracking-widest text-amber-300/75 mb-2.5 font-semibold">
+                    Lista uczestników (kliknij, aby wybrać)
+                </p>
+                <div id="participants-badges" class="flex flex-wrap justify-center gap-1.5"></div>
+            </div>
+        </section>
+
+        <!-- STEP 2: Interactive Christmas Tree -->
+        <section id="screen-tree" class="glass-panel rounded-3xl p-6 sm:p-10 text-center hidden-screen">
+            <div class="inline-block px-4 py-1 rounded-full bg-emerald-950/90 border border-emerald-500/40 text-emerald-300 text-sm font-medium mb-3">
+                <span id="greeting-prefix">Cześć,</span> <span id="greeting-name" class="font-bold text-amber-300"></span>! 🎄
+            </div>
+
+            <h2 id="tree-title" class="font-christmas text-3xl sm:text-4xl text-amber-200 mb-2">
+                Magiczna Choinka Czeka
+            </h2>
+            <p id="tree-subtitle" class="text-slate-300 text-sm sm:text-base mb-4">
+                Kliknij w choinkę poniżej, aby wezwać Świętego Mikołaja i rozpocząć losowanie!
+            </p>
+
+            <div class="flex justify-center my-2">
+                <button id="christmas-tree-btn" type="button" aria-label="Kliknij w choinkę, aby rozpocząć losowanie" class="tree-container focus:outline-none p-2 rounded-3xl">
+                    <svg width="260" height="310" viewBox="0 0 300 350" class="w-56 sm:w-64 h-auto drop-shadow-2xl">
+                        <defs>
+                            <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="#fef08a" stop-opacity="1" />
+                                <stop offset="100%" stop-color="#f59e0b" stop-opacity="0" />
+                            </radialGradient>
+                            <linearGradient id="treeGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#10b981" />
+                                <stop offset="100%" stop-color="#065f46" />
+                            </linearGradient>
+                            <linearGradient id="treeGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#059669" />
+                                <stop offset="100%" stop-color="#064e3b" />
+                            </linearGradient>
+                            <linearGradient id="trunkGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#451a03" />
+                                <stop offset="50%" stop-color="#78350f" />
+                                <stop offset="100%" stop-color="#451a03" />
+                            </linearGradient>
+                        </defs>
+
+                        <circle cx="150" cy="34" r="34" fill="url(#starGlow)" opacity="0.65" />
+                        <rect x="132" y="275" width="36" height="45" rx="4" fill="url(#trunkGrad)" />
+
+                        <path d="M150 145 L45 280 Q150 295 255 280 Z" fill="url(#treeGrad2)" />
+                        <path d="M150 95 L65 215 Q150 228 235 215 Z" fill="url(#treeGrad1)" />
+                        <path d="M150 42 L85 145 Q150 156 215 145 Z" fill="url(#treeGrad1)" />
+
+                        <path d="M105 120 Q150 142 195 120" fill="none" stroke="#fbbf24" stroke-width="3" stroke-dasharray="6 4" opacity="0.85" />
+                        <path d="M82 185 Q150 212 218 185" fill="none" stroke="#fbbf24" stroke-width="3.5" stroke-dasharray="6 4" opacity="0.85" />
+                        <path d="M62 250 Q150 282 238 250" fill="none" stroke="#fbbf24" stroke-width="4" stroke-dasharray="6 4" opacity="0.85" />
+
+                        <polygon class="tree-star" points="150,10 157,26 175,27 161,38 165,55 150,45 135,55 139,38 125,27 143,26" fill="#fde047" stroke="#f59e0b" stroke-width="1.5" />
+
+                        <circle cx="135" cy="95" r="7" fill="#ef4444" class="ornament-1" />
+                        <circle cx="168" cy="110" r="6" fill="#38bdf8" class="ornament-2" />
+                        <circle cx="150" cy="130" r="7" fill="#fbbf24" class="ornament-3" />
+
+                        <circle cx="110" cy="165" r="8" fill="#f43f5e" class="ornament-2" />
+                        <circle cx="150" cy="175" r="7" fill="#a855f7" class="ornament-4" />
+                        <circle cx="188" cy="168" r="8" fill="#fbbf24" class="ornament-1" />
+                        <circle cx="130" cy="198" r="6" fill="#38bdf8" class="ornament-3" />
+                        <circle cx="172" cy="196" r="7" fill="#ef4444" class="ornament-2" />
+
+                        <circle cx="88" cy="235" r="9" fill="#fbbf24" class="ornament-3" />
+                        <circle cx="125" cy="245" r="8" fill="#ef4444" class="ornament-1" />
+                        <circle cx="165" cy="242" r="9" fill="#38bdf8" class="ornament-4" />
+                        <circle cx="212" cy="238" r="8" fill="#f43f5e" class="ornament-2" />
+                        <circle cx="105" cy="268" r="7" fill="#a855f7" class="ornament-1" />
+                        <circle cx="192" cy="266" r="7" fill="#fde047" class="ornament-3" />
+
+                        <g transform="translate(58, 286)">
+                            <rect x="0" y="6" width="44" height="36" rx="4" fill="#dc2626" />
+                            <rect x="18" y="6" width="8" height="36" fill="#fbbf24" />
+                            <rect x="0" y="20" width="44" height="7" fill="#fbbf24" />
+                            <path d="M22 6 C14 -4, 6 2, 22 6 C38 2, 30 -4, 22 6" fill="none" stroke="#fde047" stroke-width="3" />
+                        </g>
+                        <g transform="translate(192, 290)">
+                            <rect x="0" y="4" width="48" height="32" rx="4" fill="#2563eb" />
+                            <rect x="20" y="4" width="8" height="32" fill="#f8fafc" />
+                            <rect x="0" y="16" width="48" height="7" fill="#f8fafc" />
+                            <path d="M24 4 C16 -5, 8 1, 24 4 C40 1, 32 -5, 24 4" fill="none" stroke="#f8fafc" stroke-width="3" />
+                        </g>
+                        <g transform="translate(115, 298)">
+                            <rect x="0" y="4" width="38" height="26" rx="3" fill="#d97706" />
+                            <rect x="16" y="4" width="6" height="26" fill="#fef3c7" />
+                        </g>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="mt-2">
+                <button id="tree-cta-btn" type="button" class="px-6 py-3 rounded-2xl bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/50 text-amber-200 font-medium text-sm sm:text-base transition cursor-pointer">
+                    👆 Kliknij w choinkę, aby rozpocząć losowanie!
+                </button>
+            </div>
+
+            <button id="back-to-login-btn" type="button" class="mt-5 text-xs text-slate-400 hover:text-amber-300 underline transition cursor-pointer">
+                Wróć do ekranu logowania
+            </button>
+        </section>
+
+        <!-- STEP 4: Result Reveal -->
+        <section id="screen-result" class="glass-panel rounded-3xl p-6 sm:p-10 text-center hidden-screen">
+            <div class="reveal-animation">
+                <div id="result-badge" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs sm:text-sm font-semibold uppercase tracking-wider mb-4">
+                    <span>🎁</span> Tajna Misja Świąteczna <span>🎁</span>
+                </div>
+
+                <h2 id="result-hohoho" class="font-christmas text-4xl sm:text-5xl text-white mb-3">
+                    Ho, ho, ho!
+                </h2>
+
+                <p class="text-slate-200 text-base sm:text-lg mb-6">
+                    <span id="result-giver" class="font-bold text-amber-300"></span><span id="result-for-text">, w tym roku kupujesz prezent dla:</span>
+                </p>
+
+                <div class="relative my-6 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-red-900/90 via-red-800/90 to-amber-900/80 border-2 border-amber-400 shadow-2xl overflow-hidden">
+                    <div class="absolute -top-6 -right-6 text-6xl opacity-20 select-none">❄️</div>
+                    <div class="absolute -bottom-6 -left-6 text-6xl opacity-20 select-none">🎄</div>
+
+                    <p id="result-card-label" class="text-xs uppercase tracking-widest text-amber-200/80 mb-1">
+                        Twoja wylosowana osoba to
+                    </p>
+                    <div id="result-receiver" class="font-christmas text-5xl sm:text-6xl font-bold gold-shimmer py-2 drop-shadow">
+                        ---
+                    </div>
+                </div>
+
+                <p id="result-secret-note" class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6">
+                    🤫 Zachowaj to w tajemnicy! Twój wynik jest zabezpieczony Twoim 4-cyfrowym kodem PIN – nikt bez niego nie podejrzy Twojego losu.
+                </p>
+
+                <button id="finish-btn" type="button" class="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-slate-800/95 hover:bg-slate-700 border border-amber-400/40 text-amber-100 text-sm font-semibold transition cursor-pointer shadow-lg">
+                    Zamknij i ukryj wynik 🔒
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- STEP 3: Full-Screen 10-Second Santa Sleigh Animation -->
+    <div id="screen-flying" class="fixed inset-0 z-50 hidden-screen flex flex-col justify-between pointer-events-none bg-gradient-to-b from-[#030712]/95 via-[#0b192e]/90 to-[#06281e]/95 backdrop-blur-md overflow-hidden">
+        <div class="absolute inset-0 pointer-events-none overflow-hidden">
+            <div class="absolute top-12 right-8 sm:right-20 w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-amber-100 shadow-[0_0_50px_rgba(253,224,71,0.6)] opacity-90">
+                <div class="absolute top-3 left-4 w-3 h-3 rounded-full bg-amber-200/60"></div>
+                <div class="absolute bottom-4 right-5 w-4 h-4 rounded-full bg-amber-200/50"></div>
+            </div>
+            <div class="sky-star absolute top-16 left-[12%] text-amber-200 text-lg">✦</div>
+            <div class="sky-star absolute top-28 left-[32%] text-white text-xs" style="animation-delay: 0.6s;">★</div>
+            <div class="sky-star absolute top-14 left-[55%] text-amber-300 text-base" style="animation-delay: 1.1s;">✦</div>
+            <div class="sky-star absolute top-36 left-[72%] text-white text-sm" style="animation-delay: 1.7s;">★</div>
+            <div class="sky-star absolute top-24 left-[86%] text-amber-200 text-xs" style="animation-delay: 0.3s;">✦</div>
+        </div>
+
+        <div class="pt-16 sm:pt-20 px-4 text-center z-40">
+            <div id="flying-badge" class="inline-block px-4 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs sm:text-sm font-semibold mb-3">
+                ✨ Magia Świąt w toku ✨
+            </div>
+            <h2 id="flying-status-text" class="font-christmas text-3xl sm:text-5xl text-white drop-shadow-lg transition-opacity duration-500">
+                Mikołaj sprawdza listę grzecznych osób...
+            </h2>
+        </div>
+
+        <div id="santa-flight-container" class="santa-fly-wrapper">
+            <svg width="460" height="150" viewBox="0 0 460 150" class="w-80 sm:w-[420px] md:w-[480px] h-auto drop-shadow-[0_12px_24px_rgba(251,191,36,0.4)]">
+                <g opacity="0.9">
+                    <circle cx="12" cy="95" r="3.5" fill="#fde047" />
+                    <circle cx="34" cy="82" r="2.5" fill="#fbbf24" />
+                    <circle cx="24" cy="110" r="3" fill="#fef08a" />
+                    <circle cx="54" cy="98" r="4" fill="#fde047" />
+                    <circle cx="48" cy="78" r="2.5" fill="#ffffff" />
+                    <circle cx="72" cy="106" r="3" fill="#fbbf24" />
+                </g>
+
+                <g class="sleigh-bob">
+                    <ellipse cx="115" cy="78" rx="24" ry="22" fill="#991b1b" stroke="#7f1d1d" stroke-width="2" />
+                    <rect x="102" y="54" width="12" height="14" rx="2" fill="#10b981" transform="rotate(-15 102 54)" />
+                    <rect x="116" y="52" width="12" height="14" rx="2" fill="#3b82f6" transform="rotate(12 116 52)" />
+
+                    <ellipse cx="148" cy="76" rx="18" ry="20" fill="#dc2626" />
+                    <circle cx="150" cy="52" r="11" fill="#fed7aa" />
+                    <path d="M140 53 Q150 74 162 53 Q151 58 140 53 Z" fill="#ffffff" />
+                    <path d="M139 47 Q148 30 164 42 L159 48 Z" fill="#dc2626" />
+                    <rect x="138" y="45" width="22" height="5" rx="2.5" fill="#ffffff" />
+                    <circle cx="165" cy="43" r="4" fill="#ffffff" />
+                    <path d="M156 66 L172 52" stroke="#dc2626" stroke-width="7" stroke-linecap="round" />
+                    <circle cx="173" cy="51" r="4" fill="#ffffff" />
+
+                    <path d="M85 75 Q95 105 130 105 L175 105 Q190 105 192 85 L165 85 Q158 92 140 92 L115 92 Q98 92 92 75 Z" fill="#b91c1c" stroke="#fbbf24" stroke-width="2.5" />
+                    <path d="M78 114 L188 114 Q205 114 208 98" fill="none" stroke="#fbbf24" stroke-width="4" stroke-linecap="round" />
+                    <line x1="108" y1="105" x2="108" y2="114" stroke="#fbbf24" stroke-width="3" />
+                    <line x1="162" y1="105" x2="162" y2="114" stroke="#fbbf24" stroke-width="3" />
+                </g>
+
+                <path d="M172 78 Q225 90 275 76" fill="none" stroke="#fde68a" stroke-width="1.5" opacity="0.85" />
+                <path d="M275 76 Q320 85 365 74" fill="none" stroke="#fde68a" stroke-width="1.5" opacity="0.85" />
+
+                <g class="reindeer-1" transform="translate(265, 62)">
+                    <line x1="10" y1="24" x2="2" y2="42" stroke="#78350f" stroke-width="3.5" stroke-linecap="round" />
+                    <line x1="32" y1="24" x2="42" y2="38" stroke="#78350f" stroke-width="3.5" stroke-linecap="round" />
+                    <ellipse cx="22" cy="18" rx="16" ry="9" fill="#92400e" />
+                    <path d="M32 14 L42 2 L52 4 L48 12 L36 20 Z" fill="#92400e" />
+                    <path d="M40 3 L36 -8 M38 -3 L32 -5 M43 2 L44 -8" stroke="#fde68a" stroke-width="2" stroke-linecap="round" />
+                    <circle cx="53" cy="5" r="2.5" fill="#fbbf24" />
+                </g>
+
+                <g class="reindeer-2" transform="translate(355, 58)">
+                    <line x1="10" y1="24" x2="0" y2="42" stroke="#78350f" stroke-width="3.5" stroke-linecap="round" />
+                    <line x1="32" y1="24" x2="44" y2="36" stroke="#78350f" stroke-width="3.5" stroke-linecap="round" />
+                    <ellipse cx="22" cy="18" rx="16" ry="9" fill="#b45309" />
+                    <path d="M32 14 L42 2 L52 4 L48 12 L36 20 Z" fill="#b45309" />
+                    <path d="M40 3 L36 -9 M38 -3 L31 -5 M43 2 L45 -9" stroke="#fde68a" stroke-width="2" stroke-linecap="round" />
+                    <circle cx="54" cy="5" r="3.5" fill="#ef4444" />
+                    <circle cx="54" cy="5" r="8" fill="#ef4444" opacity="0.45" />
+                </g>
+            </svg>
+        </div>
+
+        <div class="pb-12 px-6 max-w-md mx-auto w-full z-40 text-center">
+            <div class="w-full h-3.5 bg-slate-800/90 rounded-full overflow-hidden border border-amber-400/40 p-0.5 shadow-inner">
+                <div id="flying-progress-bar" class="h-full bg-gradient-to-r from-red-500 via-amber-400 to-emerald-400 rounded-full"></div>
+            </div>
+            <p id="flying-countdown" class="text-amber-200 text-sm font-semibold mt-2.5 tracking-wide">
+                Pozostało: 10s
+            </p>
+        </div>
+    </div>
+
+    <!-- Collapsible Status Modal -->
+    <div id="status-modal" class="fixed inset-0 z-50 hidden-screen flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
+        <div class="glass-panel rounded-3xl p-6 sm:p-8 max-w-md w-full text-left relative">
+            <button id="status-close-btn" type="button" class="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer">
+                ✕
+            </button>
+
+            <h3 id="status-title" class="font-christmas text-3xl text-amber-300 mb-1">Status Losowania 🎅</h3>
+            <p id="status-subtitle" class="text-slate-400 text-xs mb-5">
+                Podgląd, kto już wylosował prezent (wyniki i kody PIN są w pełni ukryte).
+            </p>
+
+            <div class="mb-5">
+                <div class="flex items-center justify-between text-xs text-slate-300 mb-2.5">
+                    <span id="status-progress-label">Postęp grupy:</span>
+                    <span id="status-progress-count" class="font-bold text-amber-400">0 / 8</span>
+                </div>
+                <div id="status-list" class="grid grid-cols-2 gap-2 text-xs"></div>
+            </div>
+
+            <div class="space-y-3 pt-4 border-t border-slate-700/70">
+                <div>
+                    <label id="status-share-label" class="block text-xs text-slate-400 mb-1">
+                        Publiczny link dla wszystkich uczestników:
+                    </label>
+                    <div class="flex gap-2">
+                        <input id="share-url-input" type="text" readonly class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-slate-300 select-all" />
+                        <button id="modal-copy-btn" type="button" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs transition shrink-0 cursor-pointer">
+                            Kopiuj
+                        </button>
+                    </div>
+                </div>
+
+                <!-- External Cloud Sync Setup for Cloudflare Pages -->
+                <div class="p-3 rounded-2xl bg-slate-900/90 border border-amber-500/30 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span id="cloud-sync-title" class="text-xs font-semibold text-amber-300">☁️ Wspólna baza danych Cloudflare</span>
+                        <span id="cloud-status-pill" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300">Tryb lokalny</span>
+                    </div>
+                    <p id="cloud-sync-desc" class="text-[11px] text-slate-400 leading-snug">
+                        Wklej darmowy URL lub konfigurację chmury (np. z Firebase Realtime Database lub JSONBlob/Firebase Web Config), a wygenerowany link zapamięta ją dla każdego telefonu!
+                    </p>
+                    <div class="flex gap-2">
+                        <input id="cloud-endpoint-input" type="text" placeholder="https://twoja-baza-default-rtdb.firebaseio.com" class="w-full px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-amber-100 placeholder-slate-500 select-text" />
+                        <button id="save-cloud-btn" type="button" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition shrink-0 cursor-pointer">
+                            Połącz
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pt-1 flex flex-col sm:flex-row gap-2">
+                    <button id="download-html-btn" type="button" class="w-full py-2.5 px-3 rounded-xl bg-amber-600/85 hover:bg-amber-500 text-white text-xs font-semibold border border-amber-300/40 transition cursor-pointer shadow">
+                        ⬇️ Pobierz plik (.html) do wysłania
+                    </button>
+                    <button id="new-room-btn" type="button" class="w-full py-2.5 px-3 rounded-xl bg-emerald-700/85 hover:bg-emerald-600 text-white text-xs font-semibold border border-emerald-400/40 transition cursor-pointer shadow">
+                        ✨ Nowy pokój losowania
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ==========================================
+        // 1. PARTICIPANTS, ROOM & CLOUD URL CONFIG
+        // ==========================================
+        const PARTICIPANTS = ["Marta", "Diego", "Julia", "Maciek", "Marek", "Marysia", "Asia", "Anita"];
+        const FLIGHT_DURATION_MS = 10000;
+
+        function parseHashState() {
+            const rawHash = window.location.hash ? window.location.hash.replace(/^#/, "").trim() : "";
+            if (!rawHash) {
+                return { room: "gwiazdka2026", cloudUrl: "", blobId: "" };
+            }
+            if (rawHash.includes("=") || rawHash.includes("&")) {
+                const params = new URLSearchParams(rawHash);
+                const r = params.get("room");
+                const c = params.get("cloud") || "";
+                const b = params.get("blob") || "";
+                return {
+                    room: r && /^[a-zA-Z0-9_-]{3,35}$/.test(r) ? r : "gwiazdka2026",
+                    cloudUrl: c.trim(),
+                    blobId: b.trim()
+                };
+            }
+            return {
+                room: /^[a-zA-Z0-9_-]{3,35}$/.test(rawHash) ? rawHash : "gwiazdka2026",
+                cloudUrl: "",
+                blobId: ""
+            };
+        }
+
+        const initialHashState = parseHashState();
+        let roomId = initialHashState.room;
+        let externalCloudUrl = initialHashState.cloudUrl || window.localStorage.getItem("secret_santa_external_cloud_url") || "";
+        let sharedBlobId = initialHashState.blobId || window.localStorage.getItem(`secret_santa_blob_${roomId}`) || "";
+
+        function buildHashFragment() {
+            if (externalCloudUrl || sharedBlobId) {
+                const p = new URLSearchParams();
+                p.set("room", roomId);
+                if (sharedBlobId) p.set("blob", sharedBlobId);
+                if (externalCloudUrl) p.set("cloud", externalCloudUrl);
+                return `#${p.toString()}`;
+            }
+            return `#${roomId}`;
+        }
+
+        try {
+            if (window.location.protocol.startsWith("http")) {
+                window.history.replaceState({}, "", buildHashFragment());
+            }
+        } catch (_) {
+            // Ignore history restrictions in sandboxed iframes
+        }
+
+        const appId = typeof __app_id !== "undefined" ? __app_id : "secret-santa-shared";
+        const LOCAL_STORAGE_KEY = `secret_santa_room_${appId}_${roomId}`;
+
+        // ==========================================
+        // 2. TRANSLATIONS (POLISH / ENGLISH)
+        // ==========================================
+        const I18N = {
+            pl: {
+                pageTitle: "Świąteczne Losowanie Prezentów 🎄",
+                roomLabel: "Pokój:",
+                copyLink: "Kopiuj link dla grupy",
+                soundTooltip: "Włącz/wyłącz dzwoneczki świąteczne",
+                statusTooltip: "Status losowania i nowy pokój",
+                loginTitle: "Świąteczne Losowanie",
+                loginSubtitle: 'Wpisz swoje imię oraz <strong class="text-amber-300">4-cyfrowy PIN</strong>. Przy pierwszym wejściu tworzysz swój PIN – po losowaniu nikt inny nie wylosuje za Ciebie ani nie podejrzy wyniku!',
+                nameLabel: "Twoje imię:",
+                namePlaceholder: "np. Marta, Diego, Julia...",
+                pinLabel: "Twój tajny 4-cyfrowy kod PIN:",
+                pinHint: "🔒 Pierwsze wejście zapisuje Twój PIN w publicznym pokoju. Powrót z tym PIN-em odblokowuje Twój wynik.",
+                loginSubmitBtn: "Przejdź do choinki ✨",
+                savingPinBtn: "Łączenie z pokojem...",
+                participantsHeading: "Lista uczestników (kliknij, aby wybrać)",
+                badgeDrawnTitle: (p) => `${p} – już wylosowano (zablokowane kodem PIN)`,
+                badgeWaitTitle: (p) => `Kliknij, aby wybrać ${p}`,
+                statusDrawn: "✅ Wylosowano",
+                statusWaiting: "⏳ Czeka",
+                errNameNotFound: (val, list) => `Nie znaleziono imienia "${val}". Wpisz jedno z imion z listy: ${list}.`,
+                errPinInvalid: "Wpisz poprawny, 4-cyfrowy kod PIN (dokładnie 4 cyfry, np. 1234).",
+                errWrongPin: (name) => `⛔ Osoba ${name} ma już ustawiony swój PIN! Podaj właściwy 4-cyfrowy kod PIN, aby otworzyć swój wynik (nie można losować ponownie).`,
+                greetingPrefix: "Cześć,",
+                treeTitleNew: "Magiczna Choinka Czeka",
+                treeSubtitleNew: "Twój PIN został zapisany! Kliknij w choinkę poniżej, aby wezwać Świętego Mikołaja i dokonać jednorazowego losowania.",
+                treeCtaNew: "👆 Kliknij w choinkę, aby rozpocząć losowanie!",
+                treeTitleReturning: "PIN poprawny! Witaj ponownie 🎄",
+                treeSubtitleReturning: "Twój los jest już zapisany. Kliknij w choinkę, aby Mikołaj ponownie pokazał Ci wylosowaną osobę.",
+                treeCtaReturning: "🎄 Kliknij w choinkę, aby zobaczyć swój wynik!",
+                treeAriaLabel: "Kliknij w choinkę, aby rozpocząć losowanie",
+                backToLogin: "Wróć do ekranu logowania",
+                flyingBadge: "✨ Magia Świąt w toku ✨",
+                flyingMessages: {
+                    10: "Mikołaj sprawdza listę grzecznych osób...",
+                    7: "Renifery pędzą przez rozgwieżdżone niebo...",
+                    4: "Elfy pakują prezent z Twoim imieniem...",
+                    2: "Mikołaj już prawie wylądował pod choinką!"
+                },
+                countdownText: (sec) => `Pozostało: ${sec}s`,
+                resultBadge: '<span>🎁</span> Tajna Misja Świąteczna <span>🎁</span>',
+                resultHohoho: "Ho, ho, ho!",
+                resultForText: ", w tym roku kupujesz prezent dla:",
+                resultCardLabel: "Twoja wylosowana osoba to",
+                resultSecretNote: "🤫 Zachowaj to w tajemnicy! Twoje imię zostało zablokowane przed ponownym losowaniem, a wynik otworzysz tylko swoim 4-cyfrowym PIN-em.",
+                finishBtn: "Zamknij i ukryj wynik 🔒",
+                statusTitle: "Status Losowania 🎅",
+                statusSubtitle: "Podgląd na żywo, kto już wylosował prezent (wyniki i kody PIN są w pełni ukryte).",
+                statusProgressLabel: "Postęp grupy:",
+                statusShareLabel: "JEDEN WSPÓLNY LINK DLA CAŁEJ RODZINY:",
+                modalCopyBtn: "Kopiuj",
+                downloadHtmlBtn: "⬇️ Pobierz plik (.html) do wysłania",
+                newRoomBtn: "✨ Nowy pokój losowania",
+                toastCopied: "🎄 Skopiowano link! Jeśli otwierasz go z podglądu edytora, użyj też przycisku „Udostępnij” na górnym pasku platformy.",
+                toastCopyFallback: "Skopiuj link z pola w ustawieniach pokoju.",
+                toastDownloaded: "📥 Pobrano plik secret_santa.html! Do wspólnej synchronizacji użyj wdrożonego projektu Cloudflare Pages i wyślij grupie link do pokoju.",
+                toastHidden: "🔒 Wynik ukryty i zabezpieczony Twoim kodem PIN!",
+                toastSoundOn: "🔔 Dzwoneczki włączone",
+                toastSoundOff: "🔇 Dźwięk wyciszony",
+                cloudSyncTitle: "☁️ Wspólna baza danych Cloudflare",
+                cloudSyncDesc: "Wspólna baza danych działa przez Cloudflare Pages i D1. Wszyscy uczestnicy muszą korzystać z tego samego linku do pokoju.",
+                cloudConnected: "Połączono z chmurą ✅",
+                cloudLocalOnly: "Oczekiwanie na wspólną bazę danych",
+                toastCloudSaved: "☁️ Połączono z chmurą! Teraz skopiuj link dla grupy i wyślij uczestnikom."
+            },
+            en: {
+                pageTitle: "Secret Santa Gift Exchange 🎄",
+                roomLabel: "Room:",
+                copyLink: "Copy group link",
+                soundTooltip: "Toggle festive jingle bells",
+                statusTooltip: "Draw status & new room",
+                loginTitle: "Secret Santa Draw",
+                loginSubtitle: 'Enter your name and a <strong class="text-amber-300">4-digit PIN</strong>. First-time visitors set their PIN – once drawn, nobody else can re-draw for you or peek at your result!',
+                nameLabel: "Your name:",
+                namePlaceholder: "e.g. Marta, Diego, Julia...",
+                pinLabel: "Your secret 4-digit PIN:",
+                pinHint: "🔒 Your first visit locks your PIN in the shared room. Return anytime with your PIN to view your draw.",
+                loginSubmitBtn: "Go to the Christmas Tree ✨",
+                savingPinBtn: "Connecting to room...",
+                participantsHeading: "Participants list (tap to select)",
+                badgeDrawnTitle: (p) => `${p} – already drawn (PIN locked)`,
+                badgeWaitTitle: (p) => `Tap to select ${p}`,
+                statusDrawn: "✅ Drawn",
+                statusWaiting: "⏳ Waiting",
+                errNameNotFound: (val, list) => `"${val}" is not on the list. Please enter one of: ${list}.`,
+                errPinInvalid: "Please enter a valid 4-digit PIN (4 digits, e.g. 1234).",
+                errWrongPin: (name) => `⛔ ${name} already has a PIN set! Enter the exact 4-digit PIN to unlock the saved result (re-drawing is blocked).`,
+                greetingPrefix: "Hi,",
+                treeTitleNew: "The Magic Tree Awaits",
+                treeSubtitleNew: "Your PIN is saved! Tap the Christmas tree below to summon Santa Claus for your one-time draw.",
+                treeCtaNew: "👆 Tap the Christmas tree to start the draw!",
+                treeTitleReturning: "PIN verified! Welcome back 🎄",
+                treeSubtitleReturning: "Your draw is already locked in. Tap the Christmas tree to view your assigned recipient again.",
+                treeCtaReturning: "🎄 Tap the Christmas tree to see your result!",
+                treeAriaLabel: "Tap the Christmas tree to start the draw",
+                backToLogin: "Back to login screen",
+                flyingBadge: "✨ Christmas Magic in Progress ✨",
+                flyingMessages: {
+                    10: "Santa is checking the nice list...",
+                    7: "Reindeer are dashing through the starry sky...",
+                    4: "Elves are wrapping a gift with your name...",
+                    2: "Santa is almost landing under the tree!"
+                },
+                countdownText: (sec) => `Time left: ${sec}s`,
+                resultBadge: '<span>🎁</span> Secret Christmas Mission <span>🎁</span>',
+                resultHohoho: "Ho, ho, ho!",
+                resultForText: ", you are buying a gift for:",
+                resultCardLabel: "Your drawn person is",
+                resultSecretNote: "🤫 Keep it secret! Your name is permanently locked against re-drawing, and only your 4-digit PIN can reveal this screen.",
+                finishBtn: "Close & hide result 🔒",
+                statusTitle: "Draw Status 🎅",
+                statusSubtitle: "Live overview of who has drawn a gift (results and PINs stay completely hidden).",
+                statusProgressLabel: "Group progress:",
+                statusShareLabel: "ONE SHARED LINK FOR THE WHOLE FAMILY:",
+                modalCopyBtn: "Copy",
+                downloadHtmlBtn: "⬇️ Download (.html) file to host",
+                newRoomBtn: "✨ Create a brand new room",
+                toastCopied: "🎄 Link copied! If sharing from the editor preview, you can also use the platform's top Share button.",
+                toastCopyFallback: "Please copy the link from the room settings modal.",
+                toastDownloaded: "📥 Downloaded secret_santa.html! Use your deployed Cloudflare Pages project for shared synchronization and send the room link to the group.",
+                toastHidden: "🔒 Result hidden and protected by your PIN!",
+                toastSoundOn: "🔔 Jingle bells enabled",
+                toastSoundOff: "🔇 Sound muted",
+                cloudSyncTitle: "☁️ Cloudflare Shared Database",
+                cloudSyncDesc: "Shared storage uses Cloudflare Pages and D1. Everyone must use the same room link.",
+                cloudConnected: "Cloud Sync Active ✅",
+                cloudLocalOnly: "Waiting for shared database",
+                toastCloudSaved: "☁️ Cloud connected! Now copy the group link and share it with everyone."
+            }
+        };
+
+        let currentLang = "pl";
+        let currentFlyingSecond = 10;
+        let isReturningUserTree = false;
+        let lastLoginErrorFn = null;
+        let selectedPerson = null;
+        let isDrawingInProgress = false;
+        let soundEnabled = true;
+
+        // ==========================================
+        // 4. SHARED PUBLIC CLOUD PERSISTENCE (FIRESTORE + EXTERNAL REST SYNC FOR NETLIFY)
+        // ==========================================
+        let roomData = null;
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        let roomDocRef = null;
+        let authReadyPromise = null;
+        let cloudPollInterval = null;
+
+        // Generate a valid derangement so no participant ever draws themselves
+        function generateDerangement(names) {
+            const receivers = [...names];
+            let valid = false;
+            let attempts = 0;
+
+            while (!valid && attempts < 1000) {
+                attempts++;
+                for (let i = receivers.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [receivers[i], receivers[j]] = [receivers[j], receivers[i]];
+                }
+                valid = names.every((giver, idx) => giver !== receivers[idx]);
+            }
+
+            if (!valid) {
+                const shifted = [...names.slice(1), names[0]];
+                const fallback = {};
+                names.forEach((giver, idx) => {
+                    fallback[giver] = shifted[idx];
+                });
+                return fallback;
+            }
+
+            const assignments = {};
+            names.forEach((giver, idx) => {
+                assignments[giver] = receivers[idx];
+            });
+            return assignments;
+        }
+
+        // Create initial room payload with assignments, PINs, and drawn flags
+        function createFreshRoomData() {
+            const assignments = generateDerangement(PARTICIPANTS);
+            const drawn = {};
+            const pins = {};
+            PARTICIPANTS.forEach((p) => {
+                drawn[p] = false;
+                pins[p] = null;
+            });
+            return {
+                roomId,
+                assignments,
+                drawn,
+                pins,
+                updatedAt: Date.now()
+            };
+        }
+
+        // Safely normalize room data loaded from Firestore, REST cloud, or localStorage
+        function normalizeRoomData(raw) {
+            const base = createFreshRoomData();
+            if (!raw || typeof raw !== "object") return base;
+
+            const validAssignments =
+                raw.assignments &&
+                PARTICIPANTS.every((p) => typeof raw.assignments[p] === "string" && raw.assignments[p] !== p);
+
+            const assignments = validAssignments ? { ...raw.assignments } : base.assignments;
+            const drawn = {};
+            const pins = {};
+
+            PARTICIPANTS.forEach((p) => {
+                drawn[p] = Boolean(raw.drawn && raw.drawn[p]);
+                pins[p] = raw.pins && typeof raw.pins[p] === "string" ? raw.pins[p] : null;
+            });
+
+            return {
+                roomId: raw.roomId || roomId,
+                assignments,
+                drawn,
+                pins,
+                updatedAt: raw.updatedAt || Date.now()
+            };
+        }
+
+        function getRestRoomEndpoint() {
+            // Wspólny pokój jest obsługiwany przez Cloudflare Pages Function + D1.
+            // Identyfikator pokoju pochodzi z linku (#room=...).
+            return `${window.location.origin}/api/room?room=${encodeURIComponent(roomId)}`;
+        }
+
+        async function ensureAutoCloudBlob() {
+            // Zachowane jako zgodność ze starszym kodem. Cloudflare nie używa już JSONBlob.
+            return;
+        }
+
+        async function initializeCloudflareRoom() {
+            const endpoint = getRestRoomEndpoint();
+            const response = await fetch(endpoint, { cache: "no-store" });
+
+            if (response.ok) {
+                const remote = await response.json();
+                if (!remote || typeof remote !== "object") {
+                    throw new Error("Serwer zwrócił nieprawidłowe dane pokoju.");
+                }
+                roomData = normalizeRoomData(remote);
+                writeLocalRoom(roomData);
+                updateParticipantsUI();
+                return;
+            }
+
+            if (response.status !== 404) {
+                throw new Error(`Nie udało się odczytać wspólnego pokoju (HTTP ${response.status}).`);
+            }
+
+            // Pierwsze otwarcie pokoju: utwórz go na serwerze. Kolejne urządzenia
+            // pobiorą już dokładnie ten sam zapis.
+            const createResponse = await fetch(endpoint, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(roomData)
+            });
+            if (!createResponse.ok) {
+                throw new Error(`Nie udało się utworzyć wspólnego pokoju (HTTP ${createResponse.status}).`);
+            }
+
+            const verifyResponse = await fetch(endpoint, { cache: "no-store" });
+            if (!verifyResponse.ok) {
+                throw new Error("Pokój nie został poprawnie zapisany na serwerze.");
+            }
+            roomData = normalizeRoomData(await verifyResponse.json());
+            writeLocalRoom(roomData);
+            updateParticipantsUI();
+        }
+
+        function updateCloudStatusBadge() {
+            const pill = document.getElementById("cloud-status-pill");
+            const input = document.getElementById("cloud-endpoint-input");
+            if (!pill) return;
+            const t = I18N[currentLang];
+            if (input && externalCloudUrl && !input.value) {
+                input.value = externalCloudUrl;
+            }
+            if (window.location.protocol.startsWith("http") || externalCloudUrl || sharedBlobId || (roomDocRef && currentUser)) {
+                pill.textContent = t.cloudConnected;
+                pill.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-500/40";
+            } else {
+                pill.textContent = t.cloudLocalOnly;
+                pill.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300";
+            }
+        }
+
+        function readLocalRoom() {
+            try {
+                const raw = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+                if (!raw) return null;
+                return normalizeRoomData(JSON.parse(raw));
+            } catch (_) {
+                return null;
+            }
+        }
+
+        function writeLocalRoom(data) {
+            try {
+                window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
+            } catch (_) {
+                // Ignore storage restrictions
+            }
+        }
+
+        async function fetchLatestRoomFromCloud() {
+            const restEndpoint = getRestRoomEndpoint();
+            if (restEndpoint) {
+                try {
+                    const res = await fetch(restEndpoint, { cache: "no-store" });
+                    if (res.ok) {
+                        const rawJson = await res.json();
+                        if (rawJson && typeof rawJson === "object") {
+                            const remoteData = normalizeRoomData(rawJson);
+                            roomData = remoteData;
+                            writeLocalRoom(remoteData);
+                            updateParticipantsUI();
+                            return remoteData;
+                        }
+                    }
+                } catch (_) {
+                    // Fallback below
+                }
+            }
+
+            if (authReadyPromise) {
+                await authReadyPromise;
+            }
+            if (roomDocRef && currentUser) {
+                try {
+                    const snap = await getDoc(roomDocRef);
+                    if (snap.exists()) {
+                        const cloudData = normalizeRoomData(snap.data());
+                        roomData = cloudData;
+                        writeLocalRoom(cloudData);
+                        updateParticipantsUI();
+                        return cloudData;
+                    }
+                } catch (_) {
+                    // Fallback to cached roomData
+                }
+            }
+            return roomData;
+        }
+
+        async function saveParticipantUpdateToCloud(person, updates) {
+            if (authReadyPromise) {
+                await authReadyPromise;
+            }
+
+            if (!externalCloudUrl && !sharedBlobId && !(roomDocRef && currentUser)) {
+                await ensureAutoCloudBlob();
+            }
+
+            const nextData = normalizeRoomData({
+                ...roomData,
+                pins: updates.pin !== undefined ? { ...roomData.pins, [person]: updates.pin } : roomData.pins,
+                drawn: updates.drawn !== undefined ? { ...roomData.drawn, [person]: updates.drawn } : roomData.drawn,
+                updatedAt: Date.now()
+            });
+
+            roomData = nextData;
+            writeLocalRoom(nextData);
+            updateParticipantsUI();
+
+            const restEndpoint = getRestRoomEndpoint();
+            if (restEndpoint) {
+                try {
+                    if (restEndpoint.includes("jsonblob.com") || restEndpoint.includes("/api/room")) {
+                        const saveResponse = await fetch(restEndpoint, {
+                            method: "PUT",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Accept": "application/json"
+                            },
+                            body: JSON.stringify(nextData)
+                        });
+                        if (!saveResponse.ok) {
+                            throw new Error(`Błąd zapisu wspólnego losowania (HTTP ${saveResponse.status}).`);
+                        }
+                    } else {
+                        const patchBody = { updatedAt: nextData.updatedAt };
+                        if (updates.pin !== undefined) {
+                            await fetch(restEndpoint.replace(/\.json$/, `/pins/${encodeURIComponent(person)}.json`), {
+                                method: "PUT",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify(updates.pin)
+                            });
+                        }
+                        if (updates.drawn !== undefined) {
+                            await fetch(restEndpoint.replace(/\.json$/, `/drawn/${encodeURIComponent(person)}.json`), {
+                                method: "PUT",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify(updates.drawn)
+                            });
+                        }
+                        await fetch(restEndpoint, {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(patchBody)
+                        });
+                    }
+                } catch (saveError) {
+                    console.error("Secret Santa cloud save failed:", saveError);
+                    const pill = document.getElementById("cloud-status-pill");
+                    if (pill) {
+                        pill.textContent = "BŁĄD ZAPISU — BRAK SYNCHRONIZACJI";
+                        pill.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-950 text-red-300 border border-red-500/50";
+                    }
+                    showToast("Nie udało się zapisać zmian we wspólnym pokoju. Sprawdź połączenie z bazą.");
+                }
+            }
+
+            if (roomDocRef && currentUser) {
+                try {
+                    const fieldUpdates = { updatedAt: nextData.updatedAt };
+                    if (updates.pin !== undefined) {
+                        fieldUpdates[`pins.${person}`] = updates.pin;
+                    }
+                    if (updates.drawn !== undefined) {
+                        fieldUpdates[`drawn.${person}`] = updates.drawn;
+                    }
+                    await updateDoc(roomDocRef, fieldUpdates);
+                } catch (_) {
+                    try {
+                        await setDoc(roomDocRef, nextData, { merge: true });
+                    } catch (__) {
+                        // Keep local state intact if offline
+                    }
+                }
+            }
+        }
+
+        async function connectExternalCloud(urlValue) {
+            const cleaned = String(urlValue || "").trim();
+            externalCloudUrl = cleaned;
+            try {
+                if (cleaned) {
+                    window.localStorage.setItem("secret_santa_external_cloud_url", cleaned);
+                } else {
+                    window.localStorage.removeItem("secret_santa_external_cloud_url");
+                }
+                if (window.location.protocol.startsWith("http")) {
+                    window.history.replaceState({}, "", buildHashFragment());
+                }
+            } catch (_) {}
+
+            updateCloudStatusBadge();
+            document.getElementById("share-url-input").value = getShareableUrl();
+
+            const restEndpoint = getRestRoomEndpoint();
+            if (restEndpoint) {
+                try {
+                    const res = await fetch(restEndpoint, { cache: "no-store" });
+                    const existing = res.ok ? await res.json() : null;
+                    if (existing && typeof existing === "object") {
+                        roomData = normalizeRoomData(existing);
+                        writeLocalRoom(roomData);
+                        updateParticipantsUI();
+                    } else {
+                        await fetch(restEndpoint, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(roomData)
+                        });
+                    }
+                } catch (_) {}
+
+                if (cloudPollInterval) clearInterval(cloudPollInterval);
+                cloudPollInterval = setInterval(() => {
+                    fetchLatestRoomFromCloud();
+                }, 5000);
+            }
+        }
+
+        async function initStorage() {
+            document.getElementById("room-badge").textContent = roomId;
+            document.getElementById("share-url-input").value = getShareableUrl();
+
+            const localExisting = readLocalRoom();
+            roomData = localExisting || createFreshRoomData();
+            writeLocalRoom(roomData);
+            updateParticipantsUI();
+            updateCloudStatusBadge();
+
+            try {
+                await initializeCloudflareRoom();
+                updateCloudStatusBadge();
+                if (cloudPollInterval) clearInterval(cloudPollInterval);
+                cloudPollInterval = setInterval(() => {
+                    fetchLatestRoomFromCloud();
+                }, 3000);
+            } catch (cloudError) {
+                console.error("Cloudflare cloud initialization failed:", cloudError);
+                const pill = document.getElementById("cloud-status-pill");
+                if (pill) {
+                    pill.textContent = "BŁĄD POŁĄCZENIA Z BAZĄ";
+                    pill.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-950 text-red-300 border border-red-500/50";
+                }
+                showToast("Nie udało się połączyć ze wspólną bazą Cloudflare. Nie losuj, dopóki połączenie nie zostanie przywrócone.");
+            }
+
+            authReadyPromise = (async () => {
+                try {
+                    const rawConfig = typeof __firebase_config !== "undefined" ? __firebase_config : null;
+                    if (!rawConfig) return;
+
+                    const firebaseConfig = typeof rawConfig === "string" ? JSON.parse(rawConfig) : rawConfig;
+                    const app = initializeApp(firebaseConfig);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+
+                    if (typeof __initial_auth_token !== "undefined" && __initial_auth_token) {
+                        try {
+                            const cred = await signInWithCustomToken(auth, __initial_auth_token);
+                            currentUser = cred.user;
+                        } catch (_) {
+                            const cred = await signInAnonymously(auth);
+                            currentUser = cred.user;
+                        }
+                    } else {
+                        const cred = await signInAnonymously(auth);
+                        currentUser = cred.user;
+                    }
+
+                    if (!currentUser) return;
+
+                    // Public shared path accessible by all visitors via the shared link
+                    roomDocRef = doc(db, "artifacts", appId, "public", "data", "secretSantaRooms", roomId);
+
+                    const initialSnap = await getDoc(roomDocRef);
+                    if (initialSnap.exists()) {
+                        const cloudData = normalizeRoomData(initialSnap.data());
+                        roomData = cloudData;
+                        writeLocalRoom(cloudData);
+                        updateParticipantsUI();
+                    } else {
+                        await setDoc(roomDocRef, roomData);
+                    }
+
+                    updateCloudStatusBadge();
+
+                    onSnapshot(
+                        roomDocRef,
+                        (snapshot) => {
+                            if (snapshot.exists()) {
+                                const liveData = normalizeRoomData(snapshot.data());
+                                roomData = liveData;
+                                writeLocalRoom(liveData);
+                                updateParticipantsUI();
+                            }
+                        },
+                        () => {
+                            // Error callback to prevent silent failures
+                        }
+                    );
+                } catch (_) {
+                    // Graceful fallback to local state
+                }
+            })();
+
+            await authReadyPromise;
+        }
+
+        // ==========================================
+        // 5. WEB AUDIO JINGLE BELLS & CHIME
+        // ==========================================
+        let audioCtx = null;
+
+        function playJingleBells(durationSec = 10) {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === "suspended") {
+                    audioCtx.resume();
+                }
+
+                const notes = [
+                    { f: 659.25, t: 0.0, d: 0.22 },
+                    { f: 659.25, t: 0.28, d: 0.22 },
+                    { f: 659.25, t: 0.56, d: 0.45 },
+                    { f: 659.25, t: 1.12, d: 0.22 },
+                    { f: 659.25, t: 1.40, d: 0.22 },
+                    { f: 659.25, t: 1.68, d: 0.45 },
+                    { f: 659.25, t: 2.24, d: 0.22 },
+                    { f: 783.99, t: 2.52, d: 0.22 },
+                    { f: 523.25, t: 2.80, d: 0.32 },
+                    { f: 587.33, t: 3.16, d: 0.18 },
+                    { f: 659.25, t: 3.38, d: 0.75 },
+
+                    { f: 698.46, t: 4.30, d: 0.22 },
+                    { f: 698.46, t: 4.58, d: 0.22 },
+                    { f: 698.46, t: 4.86, d: 0.35 },
+                    { f: 698.46, t: 5.26, d: 0.18 },
+                    { f: 698.46, t: 5.48, d: 0.22 },
+                    { f: 659.25, t: 5.76, d: 0.22 },
+                    { f: 659.25, t: 6.04, d: 0.22 },
+                    { f: 659.25, t: 6.32, d: 0.18 },
+                    { f: 659.25, t: 6.54, d: 0.18 },
+                    { f: 587.33, t: 6.78, d: 0.22 },
+                    { f: 587.33, t: 7.06, d: 0.22 },
+                    { f: 659.25, t: 7.34, d: 0.22 },
+                    { f: 587.33, t: 7.62, d: 0.42 },
+                    { f: 783.99, t: 8.12, d: 0.55 },
+                    { f: 1046.50, t: 8.80, d: 0.85 }
+                ];
+
+                const now = audioCtx.currentTime;
+                notes.forEach((n) => {
+                    if (n.t > durationSec) return;
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = "triangle";
+                    osc.frequency.setValueAtTime(n.f, now + n.t);
+
+                    gain.gain.setValueAtTime(0.001, now + n.t);
+                    gain.gain.exponentialRampToValueAtTime(0.085, now + n.t + 0.04);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + n.t + n.d);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + n.t);
+                    osc.stop(now + n.t + n.d + 0.05);
+                });
+            } catch (_) {
+                // Ignore audio errors
+            }
+        }
+
+        function playRevealChime() {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const freqs = [523.25, 659.25, 783.99, 1046.50];
+                const now = audioCtx.currentTime;
+                freqs.forEach((f, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = "sine";
+                    osc.frequency.setValueAtTime(f, now + idx * 0.09);
+                    gain.gain.setValueAtTime(0.001, now + idx * 0.09);
+                    gain.gain.exponentialRampToValueAtTime(0.11, now + idx * 0.09 + 0.03);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.09 + 0.8);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + idx * 0.09);
+                    osc.stop(now + idx * 0.09 + 0.85);
+                });
+            } catch (_) {
+                // Ignore audio errors
+            }
+        }
+
+        // ==========================================
+        // 6. LANGUAGE SWITCHER & UI UPDATES
+        // ==========================================
+        function applyLanguage(lang) {
+            currentLang = lang;
+            const t = I18N[lang];
+            document.documentElement.lang = lang;
+            document.title = t.pageTitle;
+
+            const plBtn = document.getElementById("lang-pl-btn");
+            const enBtn = document.getElementById("lang-en-btn");
+            if (lang === "pl") {
+                plBtn.className = "px-2.5 py-1 rounded-full text-xs font-semibold transition cursor-pointer bg-amber-500 text-slate-950 shadow";
+                enBtn.className = "px-2.5 py-1 rounded-full text-xs font-semibold transition cursor-pointer text-slate-300 hover:text-white";
+            } else {
+                enBtn.className = "px-2.5 py-1 rounded-full text-xs font-semibold transition cursor-pointer bg-amber-500 text-slate-950 shadow";
+                plBtn.className = "px-2.5 py-1 rounded-full text-xs font-semibold transition cursor-pointer text-slate-300 hover:text-white";
+            }
+
+            document.getElementById("room-label").textContent = t.roomLabel;
+            document.getElementById("sound-toggle-btn").title = t.soundTooltip;
+            document.getElementById("status-open-btn").title = t.statusTooltip;
+
+            document.getElementById("login-title").textContent = t.loginTitle;
+            document.getElementById("login-subtitle").innerHTML = t.loginSubtitle;
+            document.getElementById("name-label").textContent = t.nameLabel;
+            document.getElementById("name-input").placeholder = t.namePlaceholder;
+            document.getElementById("pin-label").textContent = t.pinLabel;
+            document.getElementById("pin-hint").textContent = t.pinHint;
+            document.getElementById("login-submit-btn").textContent = t.loginSubmitBtn;
+            document.getElementById("participants-heading").textContent = t.participantsHeading;
+
+            const errorEl = document.getElementById("login-error");
+            if (lastLoginErrorFn && !errorEl.classList.contains("hidden")) {
+                errorEl.textContent = lastLoginErrorFn(t);
+            }
+
+            document.getElementById("greeting-prefix").textContent = t.greetingPrefix;
+            document.getElementById("christmas-tree-btn").setAttribute("aria-label", t.treeAriaLabel);
+            document.getElementById("back-to-login-btn").textContent = t.backToLogin;
+
+            if (isReturningUserTree) {
+                document.getElementById("tree-title").textContent = t.treeTitleReturning;
+                document.getElementById("tree-subtitle").textContent = t.treeSubtitleReturning;
+                document.getElementById("tree-cta-btn").textContent = t.treeCtaReturning;
+            } else {
+                document.getElementById("tree-title").textContent = t.treeTitleNew;
+                document.getElementById("tree-subtitle").textContent = t.treeSubtitleNew;
+                document.getElementById("tree-cta-btn").textContent = t.treeCtaNew;
+            }
+
+            document.getElementById("flying-badge").textContent = t.flyingBadge;
+            document.getElementById("flying-countdown").textContent = t.countdownText(currentFlyingSecond);
+            let activeMsg = t.flyingMessages[10];
+            if (currentFlyingSecond <= 2) activeMsg = t.flyingMessages[2];
+            else if (currentFlyingSecond <= 4) activeMsg = t.flyingMessages[4];
+            else if (currentFlyingSecond <= 7) activeMsg = t.flyingMessages[7];
+            document.getElementById("flying-status-text").textContent = activeMsg;
+
+            document.getElementById("result-badge").innerHTML = t.resultBadge;
+            document.getElementById("result-hohoho").textContent = t.resultHohoho;
+            document.getElementById("result-for-text").textContent = t.resultForText;
+            document.getElementById("result-card-label").textContent = t.resultCardLabel;
+            document.getElementById("result-secret-note").textContent = t.resultSecretNote;
+            document.getElementById("finish-btn").textContent = t.finishBtn;
+
+            document.getElementById("status-title").textContent = t.statusTitle;
+            document.getElementById("status-subtitle").textContent = t.statusSubtitle;
+            document.getElementById("status-progress-label").textContent = t.statusProgressLabel;
+            document.getElementById("status-share-label").textContent = t.statusShareLabel;
+            document.getElementById("modal-copy-btn").textContent = t.modalCopyBtn;
+            document.getElementById("download-html-btn").textContent = t.downloadHtmlBtn;
+            document.getElementById("new-room-btn").textContent = t.newRoomBtn;
+            document.getElementById("cloud-sync-title").textContent = t.cloudSyncTitle;
+            document.getElementById("cloud-sync-desc").textContent = t.cloudSyncDesc;
+
+            updateCloudStatusBadge();
+            updateParticipantsUI();
+        }
+
+        document.getElementById("lang-pl-btn").addEventListener("click", () => applyLanguage("pl"));
+        document.getElementById("lang-en-btn").addEventListener("click", () => applyLanguage("en"));
+
+        // ==========================================
+        // 7. SCREENS, TOAST & PARTICIPANT STATUS
+        // ==========================================
+        const screens = {
+            login: document.getElementById("screen-login"),
+            tree: document.getElementById("screen-tree"),
+            flying: document.getElementById("screen-flying"),
+            result: document.getElementById("screen-result")
+        };
+
+        function showScreen(name) {
+            Object.values(screens).forEach((el) => el.classList.add("hidden-screen"));
+            if (screens[name]) {
+                screens[name].classList.remove("hidden-screen");
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById("toast-box");
+            toast.textContent = message;
+            toast.classList.remove("opacity-0", "translate-y-4");
+            toast.classList.add("opacity-100", "translate-y-0");
+            setTimeout(() => {
+                toast.classList.add("opacity-0", "translate-y-4");
+                toast.classList.remove("opacity-100", "translate-y-0");
+            }, 3000);
+        }
+
+        function normalizeName(str) {
+            return String(str || "")
+                .trim()
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/ł/g, "l");
+        }
+
+        function matchParticipant(rawInput) {
+            const target = normalizeName(rawInput);
+            if (!target) return null;
+            return PARTICIPANTS.find((p) => normalizeName(p) === target) || null;
+        }
+
+        function updateParticipantsUI() {
+            const badgesContainer = document.getElementById("participants-badges");
+            const statusList = document.getElementById("status-list");
+            const progressCount = document.getElementById("status-progress-count");
+
+            if (!roomData) return;
+            const t = I18N[currentLang];
+
+            badgesContainer.innerHTML = "";
+            statusList.innerHTML = "";
+            let drawnCount = 0;
+
+            PARTICIPANTS.forEach((person) => {
+                const isDrawn = Boolean(roomData.drawn && roomData.drawn[person]);
+                if (isDrawn) drawnCount++;
+
+                const badge = document.createElement("button");
+                badge.type = "button";
+                badge.className = `px-2.5 py-1 rounded-full text-xs font-medium transition cursor-pointer ${
+                    isDrawn
+                        ? "bg-emerald-950/80 text-emerald-300 border border-emerald-500/40"
+                        : "bg-slate-800/85 text-slate-200 border border-slate-600/60 hover:border-amber-400/60"
+                }`;
+                badge.textContent = `${person}${isDrawn ? " 🔒" : ""}`;
+                badge.title = isDrawn ? t.badgeDrawnTitle(person) : t.badgeWaitTitle(person);
+                badge.addEventListener("click", () => {
+                    document.getElementById("name-input").value = person;
+                    document.getElementById("pin-input").focus();
+                });
+                badgesContainer.appendChild(badge);
+
+                const row = document.createElement("div");
+                row.className = `flex items-center justify-between px-3 py-2 rounded-xl border ${
+                    isDrawn
+                        ? "bg-emerald-950/60 border-emerald-500/30 text-emerald-200"
+                        : "bg-slate-900/70 border-slate-700/60 text-slate-300"
+                }`;
+                row.innerHTML = `
+                    <span class="font-medium">${person}</span>
+                    <span class="text-[11px] font-semibold">${isDrawn ? t.statusDrawn : t.statusWaiting}</span>
+                `;
+                statusList.appendChild(row);
+            });
+
+            progressCount.textContent = `${drawnCount} / ${PARTICIPANTS.length}`;
+        }
+
+        // ==========================================
+        // 8. STEP 1 LOGIN & PIN VERIFICATION
+        // ==========================================
+        document.getElementById("login-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const t = I18N[currentLang];
+            const nameInput = document.getElementById("name-input");
+            const pinInput = document.getElementById("pin-input");
+            const errorEl = document.getElementById("login-error");
+            const submitBtn = document.getElementById("login-submit-btn");
+
+            const rawName = nameInput.value.trim();
+            const matched = matchParticipant(rawName);
+            const pin = pinInput.value.trim();
+
+            if (!matched) {
+                lastLoginErrorFn = (dict) => dict.errNameNotFound(rawName, PARTICIPANTS.join(", "));
+                errorEl.textContent = lastLoginErrorFn(t);
+                errorEl.classList.remove("hidden");
+                return;
+            }
+
+            if (!/^\d{4}$/.test(pin)) {
+                lastLoginErrorFn = (dict) => dict.errPinInvalid;
+                errorEl.textContent = lastLoginErrorFn(t);
+                errorEl.classList.remove("hidden");
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = t.savingPinBtn;
+
+            // Always fetch the latest public room state before checking PIN & draw status
+            await fetchLatestRoomFromCloud();
+            if (!roomData) {
+                roomData = readLocalRoom() || createFreshRoomData();
+            }
+
+            const savedPin = roomData.pins ? roomData.pins[matched] : null;
+            const alreadyDrawn = Boolean(roomData.drawn && roomData.drawn[matched]);
+
+            // Block any other person from re-drawing or peeking once PIN or draw is claimed
+            if ((alreadyDrawn || savedPin) && savedPin !== pin) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = I18N[currentLang].loginSubmitBtn;
+                lastLoginErrorFn = (dict) => dict.errWrongPin(matched);
+                errorEl.textContent = lastLoginErrorFn(I18N[currentLang]);
+                errorEl.classList.remove("hidden");
+                pinInput.value = "";
+                return;
+            }
+
+            // First-time claim: lock this participant's PIN immediately in the shared public room
+            if (!savedPin) {
+                await saveParticipantUpdateToCloud(matched, { pin });
+            }
+
+            submitBtn.disabled = false;
+            submitBtn.textContent = I18N[currentLang].loginSubmitBtn;
+
+            lastLoginErrorFn = null;
+            errorEl.classList.add("hidden");
+            selectedPerson = matched;
+            isReturningUserTree = alreadyDrawn;
+
+            const currDict = I18N[currentLang];
+            document.getElementById("greeting-name").textContent = selectedPerson;
+            if (alreadyDrawn) {
+                document.getElementById("tree-title").textContent = currDict.treeTitleReturning;
+                document.getElementById("tree-subtitle").textContent = currDict.treeSubtitleReturning;
+                document.getElementById("tree-cta-btn").textContent = currDict.treeCtaReturning;
+            } else {
+                document.getElementById("tree-title").textContent = currDict.treeTitleNew;
+                document.getElementById("tree-subtitle").textContent = currDict.treeSubtitleNew;
+                document.getElementById("tree-cta-btn").textContent = currDict.treeCtaNew;
+            }
+
+            showScreen("tree");
+        });
+
+        // ==========================================
+        // 9. STEP 2 & 3: TREE CLICK -> 10s SANTA FLIGHT
+        // ==========================================
+        async function startSantaDraw() {
+            if (!selectedPerson || isDrawingInProgress || !roomData) return;
+            isDrawingInProgress = true;
+
+            // Mark participant as permanently drawn in the shared public room
+            if (!roomData.drawn[selectedPerson]) {
+                await saveParticipantUpdateToCloud(selectedPerson, { drawn: true });
+            }
+
+            const santaContainer = document.getElementById("santa-flight-container");
+            const progressBar = document.getElementById("flying-progress-bar");
+
+            santaContainer.classList.remove("santa-fly-wrapper");
+            progressBar.classList.remove("progress-10s");
+            void santaContainer.offsetWidth;
+            santaContainer.classList.add("santa-fly-wrapper");
+            progressBar.classList.add("progress-10s");
+
+            showScreen("flying");
+            playJingleBells(10);
+
+            const statusText = document.getElementById("flying-status-text");
+            const countdownEl = document.getElementById("flying-countdown");
+
+            currentFlyingSecond = 10;
+            countdownEl.textContent = I18N[currentLang].countdownText(currentFlyingSecond);
+            statusText.textContent = I18N[currentLang].flyingMessages[10];
+
+            const timerInterval = setInterval(() => {
+                currentFlyingSecond--;
+                if (currentFlyingSecond > 0) {
+                    const dict = I18N[currentLang];
+                    countdownEl.textContent = dict.countdownText(currentFlyingSecond);
+                    if (dict.flyingMessages[currentFlyingSecond]) {
+                        statusText.textContent = dict.flyingMessages[currentFlyingSecond];
+                    }
+                } else {
+                    clearInterval(timerInterval);
+                }
+            }, 1000);
+
+            setTimeout(() => {
+                clearInterval(timerInterval);
+                const receiver = roomData.assignments[selectedPerson];
+                document.getElementById("result-giver").textContent = selectedPerson;
+                document.getElementById("result-receiver").textContent = receiver;
+
+                showScreen("result");
+                playRevealChime();
+                launchConfetti();
+                isDrawingInProgress = false;
+            }, FLIGHT_DURATION_MS);
+        }
+
+        document.getElementById("christmas-tree-btn").addEventListener("click", startSantaDraw);
+        document.getElementById("tree-cta-btn").addEventListener("click", startSantaDraw);
+
+        function resetToLogin(toastMsg) {
+            selectedPerson = null;
+            document.getElementById("name-input").value = "";
+            document.getElementById("pin-input").value = "";
+            document.getElementById("login-error").classList.add("hidden");
+            lastLoginErrorFn = null;
+            showScreen("login");
+            if (toastMsg) showToast(toastMsg);
+        }
+
+        document.getElementById("back-to-login-btn").addEventListener("click", () => resetToLogin(null));
+        document.getElementById("finish-btn").addEventListener("click", () => {
+            resetToLogin(I18N[currentLang].toastHidden);
+        });
+
+        // ==========================================
+        // 10. SHARE LINK, SOUND & STATUS MODAL
+        // ==========================================
+        function getShareableUrl() {
+            let candidateUrl = "";
+
+            // 1. Check parent window URL if accessible (same-origin)
+            try {
+                if (window.parent && window.parent !== window && window.parent.location.href.startsWith("http")) {
+                    candidateUrl = window.parent.location.href;
+                }
+            } catch (_) {
+                // Cross-origin iframe: cannot read parent.location directly
+            }
+
+            // 2. Check current window URL (ignoring sandboxed about:/blob: or internal usercontent frames)
+            if (!candidateUrl && window.location.href.startsWith("http") && !window.location.hostname.includes("scf.usercontent.goog")) {
+                candidateUrl = window.location.href;
+            }
+
+            // 3. Check document.referrer (usually holds the exact host page URL, e.g. gemini.google.com/...)
+            if (!candidateUrl && document.referrer && document.referrer.startsWith("http") && !document.referrer.includes("scf.usercontent.goog")) {
+                candidateUrl = document.referrer;
+            }
+
+            if (candidateUrl) {
+                try {
+                    const parsed = new URL(candidateUrl);
+                    // Embed both room ID and cloud sync URL into hash fragment (works with Cloudflare Pages room links)
+                    parsed.hash = buildHashFragment().replace(/^#/, "");
+                    return parsed.toString();
+                } catch (_) {
+                    return candidateUrl;
+                }
+            }
+
+            return window.location.href;
+        }
+
+        function copyShareLink() {
+            const url = getShareableUrl();
+            const shareInput = document.getElementById("share-url-input");
+            if (shareInput) {
+                shareInput.value = url;
+            }
+
+            const t = I18N[currentLang];
+            const tempInput = document.createElement("textarea");
+            tempInput.value = url;
+            tempInput.style.position = "fixed";
+            tempInput.style.opacity = "0";
+            document.body.appendChild(tempInput);
+            tempInput.focus();
+            tempInput.select();
+            tempInput.setSelectionRange(0, 99999);
+
+            let copied = false;
+            try {
+                copied = document.execCommand("copy");
+            } catch (_) {
+                copied = false;
+            }
+            document.body.removeChild(tempInput);
+
+            if (copied) {
+                showToast(t.toastCopied);
+            } else {
+                showToast(t.toastCopyFallback);
+            }
+        }
+
+        function downloadStandaloneHtml() {
+            const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+            const downloadUrl = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = downloadUrl;
+            link.download = `secret_santa_${roomId}.html`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(downloadUrl);
+            showToast(I18N[currentLang].toastDownloaded);
+        }
+
+        document.getElementById("modal-copy-btn").addEventListener("click", copyShareLink);
+        document.getElementById("download-html-btn").addEventListener("click", downloadStandaloneHtml);
+        document.getElementById("save-cloud-btn").addEventListener("click", async () => {
+            const val = document.getElementById("cloud-endpoint-input").value.trim();
+            await connectExternalCloud(val);
+            showToast(I18N[currentLang].toastCloudSaved);
+        });
+
+        const statusModal = document.getElementById("status-modal");
+        document.getElementById("status-open-btn").addEventListener("click", () => {
+            updateParticipantsUI();
+            document.getElementById("share-url-input").value = getShareableUrl();
+            statusModal.classList.remove("hidden-screen");
+        });
+
+        document.getElementById("status-close-btn").addEventListener("click", () => {
+            statusModal.classList.add("hidden-screen");
+        });
+
+        statusModal.addEventListener("click", (e) => {
+            if (e.target === statusModal) {
+                statusModal.classList.add("hidden-screen");
+            }
+        });
+
+        document.getElementById("new-room-btn").addEventListener("click", () => {
+            const code = `swieta_${Math.random().toString(36).substring(2, 8)}`;
+            roomId = code;
+            sharedBlobId = "";
+            window.location.hash = buildHashFragment().replace(/^#/, "");
+            window.location.reload();
+        });
+
+        // ==========================================
+        // 11. SNOW & CONFETTI CANVAS
+        // ==========================================
+        const canvas = document.getElementById("snow-canvas");
+        const ctx = canvas.getContext("2d");
+        let width = (canvas.width = window.innerWidth);
+        let height = (canvas.height = window.innerHeight);
+
+        window.addEventListener("resize", () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        const snowflakes = Array.from({ length: 85 }, () => ({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            r: Math.random() * 3 + 1,
+            d: Math.random() * 1 + 0.4,
+            drift: Math.random() * 1 - 0.5
+        }));
+
+        let confettiParticles = [];
+
+        function launchConfetti() {
+            const colors = ["#fbbf24", "#ef4444", "#10b981", "#38bdf8", "#f472b6", "#ffffff"];
+            confettiParticles = Array.from({ length: 130 }, () => ({
+                x: width / 2 + (Math.random() - 0.5) * 140,
+                y: height / 2,
+                vx: (Math.random() - 0.5) * 14,
+                vy: (Math.random() - 0.85) * 15,
+                size: Math.random() * 7 + 4,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                rotation: Math.random() * 360,
+                vRot: (Math.random() - 0.5) * 10
+            }));
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, width, height);
+
+            ctx.fillStyle = "rgba(255, 255, 255, 0.78)";
+            ctx.beginPath();
+            snowflakes.forEach((f) => {
+                ctx.moveTo(f.x, f.y);
+                ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+            });
+            ctx.fill();
+
+            snowflakes.forEach((f) => {
+                f.y += f.d;
+                f.x += f.drift + Math.sin(f.y * 0.01) * 0.3;
+                if (f.y > height) {
+                    f.y = -5;
+                    f.x = Math.random() * width;
+                }
+                if (f.x > width) f.x = 0;
+                if (f.x < 0) f.x = width;
+            });
+
+            if (confettiParticles.length > 0) {
+                confettiParticles.forEach((p, idx) => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.28;
+                    p.rotation += p.vRot;
+
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.rotation * Math.PI) / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+                    ctx.restore();
+
+                    if (p.y > height + 20) {
+                        confettiParticles.splice(idx, 1);
+                    }
+                });
+            }
+
+            requestAnimationFrame(animateCanvas);
+        }
+
+        window.addEventListener("load", () => {
+            animateCanvas();
+            initStorage();
+            applyLanguage("pl");
+        });
+    </script>
+</body>
+</html>
