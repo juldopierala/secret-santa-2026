@@ -144,7 +144,33 @@
         .reindeer-1 { transform-box: fill-box; transform-origin: center; animation: reindeerGallop 0.45s ease-in-out infinite; }
         .reindeer-2 { transform-box: fill-box; transform-origin: center; animation: reindeerGallop 0.45s ease-in-out infinite 0.15s; }
         .sky-star { animation: starTwinkleSky 2.2s ease-in-out infinite; }
+snowflake {
+    position: absolute;
+    top: -30px;
+    color: #ffffff;
+    font-size: 16px;
+    opacity: 0.85;
+    animation: snowfall 7s linear infinite;
+    text-shadow: 0 0 8px rgba(255,255,255,0.8);
+}
 
+@keyframes snowfall {
+    0% {
+        transform: translate3d(0, -20px, 0) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.9;
+    }
+    50% {
+        transform: translate3d(35px, 50vh, 0) rotate(180deg);
+    }
+    100% {
+        transform: translate3d(-20px, 105vh, 0) rotate(360deg);
+        opacity: 0.2;
+    }
+}
+        
        .progress-10s {
     animation: progressFill15s 15s linear forwards;
 }
