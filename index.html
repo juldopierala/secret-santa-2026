@@ -144,7 +144,7 @@
         .reindeer-1 { transform-box: fill-box; transform-origin: center; animation: reindeerGallop 0.45s ease-in-out infinite; }
         .reindeer-2 { transform-box: fill-box; transform-origin: center; animation: reindeerGallop 0.45s ease-in-out infinite 0.15s; }
         .sky-star { animation: starTwinkleSky 2.2s ease-in-out infinite; }
-snowflake {
+.snowflake {
     position: absolute;
     top: -30px;
     color: #ffffff;
@@ -171,7 +171,7 @@ snowflake {
     }
 }
         
-       .progress-10s {
+       .progress-15s {
     animation: progressFill15s 15s linear forwards;
 }
 
@@ -559,7 +559,7 @@ snowflake {
                 <div id="flying-progress-bar" class="h-full bg-gradient-to-r from-red-500 via-amber-400 to-emerald-400 rounded-full"></div>
             </div>
             <p id="flying-countdown" class="text-amber-200 text-sm font-semibold mt-2.5 tracking-wide">
-                Pozostało: 10s
+Pozostało: 15s
             </p>
         </div>
     </div>
@@ -1606,7 +1606,7 @@ flyingMessages: {
         });
 
         // ==========================================
-        // 9. STEP 2 & 3: TREE CLICK -> 10s SANTA FLIGHT
+        // 9. STEP 2 & 3: TREE CLICK -> 15s SANTA FLIGHT
         // ==========================================
         async function startSantaDraw() {
             if (!selectedPerson || isDrawingInProgress || !roomData) return;
@@ -1621,10 +1621,10 @@ flyingMessages: {
             const progressBar = document.getElementById("flying-progress-bar");
 
             santaContainer.classList.remove("santa-fly-wrapper");
-            progressBar.classList.remove("progress-10s");
+            progressBar.classList.remove("progress-15s");
             void santaContainer.offsetWidth;
             santaContainer.classList.add("santa-fly-wrapper");
-            progressBar.classList.add("progress-10s");
+            progressBar.classList.add("progress-15s");
 
             showScreen("flying");
             playJingleBells(15);
