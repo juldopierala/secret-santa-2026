@@ -66,10 +66,3 @@ export async function onRequestPut({ request, env }) {
     return json({ error: "Shared storage unavailable" }, 500);
   }
 }
-
-export async function onRequest({ request }) {
-  if (request.method !== "GET" && request.method !== "PUT") {
-    return json({ error: "Method not allowed" }, 405);
-  }
-  return json({ error: "Method not allowed" }, 405);
-}
